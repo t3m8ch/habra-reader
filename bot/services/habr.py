@@ -14,40 +14,41 @@ class HabraService:
     async def get_new_articles(self) -> list[models.Article]:
         async with self._session.get("https://habr.com/ru/page1/") as res:
             html = await res.text()
-            soup = BeautifulSoup(html, "lxml")
 
-            new_articles = {}
+        soup = BeautifulSoup(html, "lxml")
 
-            if not os.path.exists("articles.json"):
-                with open("articles.json", "x") as f:
-                    f.write("{}")
+        new_articles = {}
 
-            with open("articles.json") as f:
-                articles = json.load(f)
+        if not os.path.exists("articles.json"):
+            with open("articles.json", "x") as f:
+                f.write("{}")
 
-            for p in soup.find_all(class_="post"):
-                title = p.find(class_="post__title").text.strip()
-                description = p.find(class_="post__text").text.strip()
-                url = p.find(class_="post__title_link").get("href")
+        with open("articles.json") as f:
+            articles = json.load(f)
 
-                article_id = url.split("/")[-2]
+        for p in soup.find_all(class_="post"):
+            title = p.find(class_="post__title").text.strip()
+            description = p.find(class_="post__text").text.strip()
+            url = p.find(class_="post__title_link").get("href")
 
-                if article_id in articles:
-                    continue
+            article_id = url.split("/")[-2]
 
-                result = {
-                    "title": title,
-                    "description": description,
-                    "url": url
-                }
+            if article_id in articles:
+                continue
 
-                articles[article_id] = result
-                new_articles[article_id] = result
+            result = {
+                "title": title,
+                "description": description,
+                "url": url
+            }
 
-            with open("articles.json", "w") as f:
-                json.dump(articles, f, indent=2, ensure_ascii=False)
+            articles[article_id] = result
+            new_articles[article_id] = result
 
-            return [
-                models.Article.parse_obj(a)
-                for a in new_articles.values()
-            ]
+        with open("articles.json", "w") as f:
+            json.dump(articles, f, indent=2, ensure_ascii=False)
+
+        return [
+            models.Article.parse_obj(a)
+            for a in new_articles.values()
+        ]
