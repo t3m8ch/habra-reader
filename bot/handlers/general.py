@@ -12,7 +12,7 @@ async def cmd_start(message: types.Message):
     await message.reply("Hello!")
 
 
-# -------- echo --------
+# -------- Command not found! --------
 @router.message()
 async def echo(message: types.Message):
-    await message.reply(message.text)
+    await message.reply("Команда не найдена!")
