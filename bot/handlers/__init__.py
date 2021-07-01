@@ -1,4 +1,7 @@
-from . import general
+from . import (
+    general,
+    habr
+)
 
 
 def register_handlers(dp):
@@ -14,4 +17,5 @@ def register_handlers(dp):
     Each handler module must contain a router object.
     Remember that the order of handlers is important!
     """
+    habr.router.register_handlers(dp)
     general.router.register_handlers(dp)
