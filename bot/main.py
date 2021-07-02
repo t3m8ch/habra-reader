@@ -4,7 +4,9 @@ import logging as log
 from aiogram import Bot, Dispatcher
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.utils import executor
+import clickhouse_driver as ch
 
+from bot.middlewares import setup_middlewares
 from config import config, UpdateMethod
 from handlers import register_handlers
 
@@ -25,6 +27,21 @@ async def on_shutdown(dp: Dispatcher):
     log.warning("BOT STOPPED!")
 
 
+def init_db(clickhouse: ch.Client):
+    clickhouse.execute(
+        "CREATE DATABASE IF NOT EXISTS habra_reader"
+    )
+    clickhouse.execute(
+        "CREATE TABLE IF NOT EXISTS habra_reader.article ( "
+        "`date_added` Date DEFAULT now(), "
+        "`title` String, "
+        "`description` String, "
+        "`url` String ) "
+        "ENGINE = ReplacingMergeTree() "
+        "ORDER BY (date_added, title)"
+    )
+
+
 def run():
     # Logging configuration
     log.basicConfig(
@@ -41,8 +58,13 @@ def run():
     )
     dp = Dispatcher(bot, storage=storage)
 
+    # DB
+    clickhouse = ch.Client(host=config.clickhouse_host)
+    init_db(clickhouse)
+
     # Register
     register_handlers(dp)
+    setup_middlewares(dp, clickhouse)
 
     # Start bot!
     if config.tg_update_method == UpdateMethod.LONG_POLLING:

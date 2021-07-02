@@ -1,4 +1,5 @@
 import aiohttp
+import clickhouse_driver as ch
 from aiogram import types
 
 from bot.misc import Router
@@ -8,9 +9,9 @@ router = Router()
 
 
 @router.message(commands=["new"])
-async def cmd_new(message: types.Message):
+async def cmd_new(message: types.Message, clickhouse: ch.Client):
     async with aiohttp.ClientSession() as session:
-        habra_service = HabraService(session)
+        habra_service = HabraService(session, clickhouse)
         articles = await habra_service.get_new_articles()
 
         if not articles:

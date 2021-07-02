@@ -9,8 +9,6 @@ from urlpath import URL
 PARSE_MODE = "HTML"
 LOG_FORMAT = "%(asctime)s - %(levelname)s - %(name)s - %(message)s"
 
-DEFAULT_DB_URL = "postgresql+asyncpg://localhost/telegram_bot"
-
 
 class UpdateMethod(str, Enum):
     WEBHOOKS = "webhooks"
@@ -38,7 +36,7 @@ class Config(BaseSettings):
 
     log_level: LogLevel = LogLevel.INFO
 
-    db_url: str = DEFAULT_DB_URL
+    clickhouse_host: str = "localhost"
 
     @property
     def tg_update_method(self) -> UpdateMethod:
