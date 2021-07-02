@@ -37,6 +37,10 @@ class Config(BaseSettings):
     log_level: LogLevel = LogLevel.INFO
 
     clickhouse_host: str = "localhost"
+    clickhouse_port: Optional[str]
+    clickhouse_database: str = "habra_reader"
+    clickhouse_user: str = "default"
+    clickhouse_password: str = ""
 
     @property
     def tg_update_method(self) -> UpdateMethod:

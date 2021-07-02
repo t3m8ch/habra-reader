@@ -22,14 +22,14 @@ class HabraService:
 
     def _add_articles(self, articles: list[models.Article]):
         self._clickhouse.execute(
-            "INSERT INTO habra_reader.article (title, description, url) VALUES",
+            "INSERT INTO article (title, description, url) VALUES",
             [a.dict() for a in articles]
         )
 
     def _get_articles(self, count: int) -> list[models.Article]:
         rows = self._clickhouse.execute(
             "SELECT (title, description, url) "
-            "FROM habra_reader.article "
+            "FROM article "
             f"ORDER BY date_added DESC LIMIT {count}"
         )
 

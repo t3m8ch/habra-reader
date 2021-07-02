@@ -29,10 +29,7 @@ async def on_shutdown(dp: Dispatcher):
 
 def init_db(clickhouse: ch.Client):
     clickhouse.execute(
-        "CREATE DATABASE IF NOT EXISTS habra_reader"
-    )
-    clickhouse.execute(
-        "CREATE TABLE IF NOT EXISTS habra_reader.article ( "
+        "CREATE TABLE IF NOT EXISTS article ( "
         "`date_added` Date DEFAULT now(), "
         "`title` String, "
         "`description` String, "
@@ -59,7 +56,13 @@ def run():
     dp = Dispatcher(bot, storage=storage)
 
     # DB
-    clickhouse = ch.Client(host=config.clickhouse_host)
+    clickhouse = ch.Client(
+        host=config.clickhouse_host,
+        port=config.clickhouse_port,
+        database=config.clickhouse_database,
+        user=config.clickhouse_user,
+        password=config.clickhouse_password
+    )
     init_db(clickhouse)
 
     # Register
