@@ -1,12 +1,15 @@
 import asyncio
 import logging as log
 
+import aiohttp
 from aiogram import Bot, Dispatcher
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.utils import executor
 import clickhouse_driver as ch
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from bot.middlewares import setup_middlewares
+from bot.services.habr import HabraService
 from config import config, UpdateMethod
 from handlers import register_handlers
 
@@ -39,6 +42,15 @@ def init_db(clickhouse: ch.Client):
     )
 
 
+def bg_adding_articles(clickhouse: ch.Client):
+    async def func():
+        async with aiohttp.ClientSession() as session:
+            habra_service = HabraService(session, clickhouse)
+            await habra_service.scheduler_task()
+
+    return func
+
+
 def run():
     # Logging configuration
     log.basicConfig(
@@ -68,6 +80,14 @@ def run():
     # Register
     register_handlers(dp)
     setup_middlewares(dp, clickhouse)
+
+    # Schedule
+    event_loop.run_until_complete(bg_adding_articles(clickhouse)())
+    log.info("Articles added!")
+
+    scheduler = AsyncIOScheduler(event_loop=event_loop)
+    scheduler.add_job(bg_adding_articles(clickhouse), "interval", minutes=5)
+    scheduler.start()
 
     # Start bot!
     if config.tg_update_method == UpdateMethod.LONG_POLLING:

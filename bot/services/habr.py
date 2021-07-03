@@ -13,12 +13,14 @@ class HabraService:
         self._clickhouse = clickhouse_driver
 
     async def get_last_articles(self) -> list[models.Article]:
-        async with self._session.get("https://habr.com/ru/page1/") as res:
+        return self._get_articles(5)
+
+    async def scheduler_task(self):
+        async with self._session.get("https://habr.com/ru/page1") as res:
             html = await res.text()
 
         articles = _parse_articles(html)
         self._add_articles(articles)
-        return self._get_articles(5)
 
     def _add_articles(self, articles: list[models.Article]):
         self._clickhouse.execute(
