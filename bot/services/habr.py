@@ -12,7 +12,7 @@ class HabraService:
         self._session = session
         self._clickhouse = clickhouse_driver
 
-    async def get_new_articles(self) -> list[models.Article]:
+    async def get_last_articles(self) -> list[models.Article]:
         async with self._session.get("https://habr.com/ru/page1/") as res:
             html = await res.text()
 

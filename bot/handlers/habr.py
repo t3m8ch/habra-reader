@@ -12,7 +12,7 @@ router = Router()
 async def cmd_new(message: types.Message, clickhouse: ch.Client):
     async with aiohttp.ClientSession() as session:
         habra_service = HabraService(session, clickhouse)
-        articles = await habra_service.get_new_articles()
+        articles = await habra_service.get_last_articles()
 
         if not articles:
             await message.answer("Новых статей пока нет :(")
